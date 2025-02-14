@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>st valentine's</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            margin: 0;
+        }
+        canvas {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heart"></canvas>
+    <script>
+        const canvas = document.getElementById("heart");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function heartFunction(t, scale) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+            return [x * scale + canvas.width / 2, -y * scale + canvas.height / 2];
+        }
+
+        let scales = [10, 15, 20, 25];
+        let currentHeart = 0;
+        let allDots = [];
+        let maxDots = 0;
+        let glowColors = ["#ff4d4d", "#ff1a1a", "#ff0000"];
+
+        function generateDots(scale) {
+            let newDots = [];
+            for (let t = 0; t < Math.PI * 2; t += 0.035) {
+                newDots.push(heartFunction(t, scale));
+            }
+            return newDots;
+        }
+
+        function drawDots() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            allDots.forEach(dots => {
+                dots.forEach(([x, y], i) => {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = glowColors[i % glowColors.length];
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = "red";
+                    ctx.fill();
+                });
+            });
+
+            let newHeart = generateDots(scales[currentHeart]);
+            for (let i = 0; i < maxDots; i++) {
+                const [x, y] = newHeart[i];
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = glowColors[i % glowColors.length];
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "red";
+                ctx.fill();
+            }
+            
+            if (maxDots < newHeart.length) {
+                maxDots += 1;
+                requestAnimationFrame(drawDots);
+            } else {
+                allDots.push(newHeart);
+                maxDots = 0;
+                currentHeart = (currentHeart + 1) % scales.length;
+                requestAnimationFrame(drawDots);
+            }
+        }
+
+        drawDots();
+    </script>
+</body>
+</html>
